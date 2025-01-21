@@ -1,38 +1,50 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose;
 
-const UserSchema = new Schema({
+const UserSchema = new Schema(
+    {
     firstName: {
-        typeof: String,
+        type: String,
         required: true,
         minLength: 4,
         maxLength: 50
     },
     lastName: {
-        typeof: String
+        type: String
     },
     emailId: {
-        typeof: String,
+        type: String,
         required: true,
         unique: true,
         trim:true
     },
     password: {
-        typeof: String,
+        type: String,
         required: true
     },
     about: {
-        typeof: String,
+        type: String,
         default: "This is te default about section of the page"
     },
     skills: {
-        typeof: String
+        type: String
     },
     age: {
         type: Number,
         min: 18
+    },
+    gender: {
+        type: String,
+        validate(value){
+            if(!("Male", "Female", "Other").includes(value)){
+                throw new Error('Gender is not appropirate')
+            }
+        }
     }
-})
+},{
+    timestamps: true
+}
+)
 
 const User = mongoose.model('User', UserSchema)
 module.exports = {User}

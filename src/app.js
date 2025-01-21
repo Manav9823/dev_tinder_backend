@@ -3,6 +3,7 @@ const { tokenMiddleware } = require('./middleware/middleware')
 const { connectDB } = require('./config/database')
 const { User } = require('./models/user')
 const app = express()
+require('dotenv').config()
 
 
 app.use(express.json())
@@ -122,5 +123,5 @@ connectDB()
         console.log('Server is listening at the port 7777')
     })
 }).catch((err)=>{
-    console.log('Error while connecting')
+    console.log('Error while connecting' + err)
 })
