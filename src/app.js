@@ -1,25 +1,71 @@
 const express = require('express')
-const { tokenMiddleware } = require('./middleware/middleware')
+const { tokenMiddleware, userAuthMiddleware } = require('./middleware/middleware')
 const { connectDB } = require('./config/database')
 const { User } = require('./models/user')
 const app = express()
 require('dotenv').config()
-
-
+const {validateSignupField} = require('./utils/utils')
+const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken')
 app.use(express.json())
+app.use(cookieParser())
+
+
 
 app.post('/signup', async(req, res) => {
     console.log(req.body)
-    const {firstName, lastName, emailId, password} = req.body
-    const newUser = new User({
-        firstName: firstName,
-        lastName: lastName,
-        emailId: emailId,
-        password: password
-    })
+    try{
+        const {firstName, lastName, emailId, password} = req.body
 
-    await newUser.save()
-    res.send('User Created Successfully')
+        // Validate Signup Field
+        validateSignupField(req, res)
+        // hash the passsword
+        const hashPassword = await bcrypt.hash(password, 10)
+
+        const newUser = new User({
+            firstName: firstName,
+            lastName: lastName,
+            emailId: emailId,
+            password: hashPassword
+        })
+        await newUser.save()
+        res.status(200).send('User Created Successfully')
+    } catch (err) {
+        res.status(400).send('Error while making a request : ' + err.message)
+    }
+})
+
+app.get('/login', async(req, res) => {
+    try{
+        const {emailId, password} = req.body
+        // const token = 'ahkvnavjanvlavnlasdvnla'
+        const user = await User.findOne({emailId: emailId})
+        console.log(user)
+        if(!user){
+            res.send('User Not found by the email Id')
+        }
+        const valid = await bcrypt.compare(password, user.password)
+        if(valid) {
+
+            const token = await user.getJWT()
+            res.cookie('token', token)
+            res.send('User Logged in successfully')
+        } else {
+            throw new Error('Password is not correct')
+        }
+    } catch(err) {
+        res.status(404).send('ERR while logging in : ' + err.message)
+    }
+})
+
+app.get('/profile', userAuthMiddleware,  async(req, res) => {
+    try{
+        const user = req.user
+        res.send('User Profile : ' + user)
+    } catch(err) {
+        res.status(400).send('ERR : ' + err.message)
+    }
 })
 
 app.get('/getUserByEmail', async(req, res, next)=>{
@@ -60,6 +106,10 @@ app.patch('/updateUser', async(req, res, next) => {
     const data = req.body
     console.log(data)
     try{
+        const ALLOWED_UPDATED_FIELDS = ["firstName", "lastName", "age", "skills"]
+        const updateAllowed = Object.keys(data).every((k) => ALLOWED_UPDATED_FIELDS.includes(k))
+        console.log('here update is allowed',updateAllowed)
+        if(!updateAllowed) throw new Error('Update Not Allowed')
         const user = await User.findByIdAndUpdate({_id: id}, data)
         res.status(200).send(`User Updated successfully ${user}`)
     } catch (err) {
@@ -67,9 +117,12 @@ app.patch('/updateUser', async(req, res, next) => {
     }
 })
 
+
 app.patch('/updateByEmail', async(req, res, next)=>{
     const emailId = req.body.emailId
     const data = req.body
+    
+    
     try{
         const user = await User.findOneAndUpdate({emailId: emailId}, data)
         res.send(`Updated User is ${user}`)

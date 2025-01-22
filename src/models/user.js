@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { Schema } = mongoose;
+const jwt = require('jsonwebtoken')
 
 const UserSchema = new Schema(
     {
@@ -24,7 +25,7 @@ const UserSchema = new Schema(
     },
     about: {
         type: String,
-        default: "This is te default about section of the page"
+        default: "This is the default about section of the page"
     },
     skills: {
         type: String
@@ -45,6 +46,12 @@ const UserSchema = new Schema(
     timestamps: true
 }
 )
+
+UserSchema.methods.getJWT = async function () {
+    const user = this
+    const token = await jwt.sign({_id: user._id}, "DEVTINDER@BACKEND")
+    return token
+} 
 
 const User = mongoose.model('User', UserSchema)
 module.exports = {User}
