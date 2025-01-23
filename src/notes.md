@@ -102,3 +102,55 @@ app.use vs app.all
 
 app.use: Used to define middleware for routes or globally
 app.all: Used to handle all HTTP methods for a specific route
+
+
+// require('./config/database')
+
+// app.use('/', (err, req, res, next) => {
+//     if(err){
+//         console.log(err)
+//         res.status(500).send('something went wrong')
+//     }
+// })
+
+
+// app.use('/admin/deleteUserData', (req, res, next) => {
+//     try{
+//         // throw new Error('error from here')
+//         res.send('User Data Deleted')
+//     } catch (error) {
+//         res.status(500).send('something again went wrong')
+//     }
+// })
+
+// app.use('/', (err, req, res, next) => {
+//     if(err){
+//         console.log(err)
+//         res.status(500).send('something went wrong')
+//     }
+// })
+
+// app.use('/admin', tokenMiddleware)
+
+// app.get('/admin/getUserData', ( req, res)=>{
+//     console.log('data present here')
+//     res.send('Data is sent back to the user')
+// })
+
+app.get('/feed', async(req, res, next)=>{
+    try{
+        const users = await User.find({})
+        res.status(200).send(`Users ${users}`)
+    } catch(err) {
+        res.status(400).send('Not found Users')
+    }
+})
+
+app.delete('/deleteUser', async(req, res, next)=>{
+    const {userId} = req.body
+    try{
+        await User.findByIdAndDelete()
+    } catch (err) {
+
+    }
+})

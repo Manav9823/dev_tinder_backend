@@ -20,6 +20,7 @@ const tokenMiddleware = (req, res, next) => {
 const userAuthMiddleware = async(req, res, next) => {
     try {
         const {token} = req.cookies
+        console.log(token)
         if(!token) {
             throw new Error('Token not present')
         }
