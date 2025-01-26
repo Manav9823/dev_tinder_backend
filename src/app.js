@@ -1,19 +1,19 @@
 const express = require('express')
-const { tokenMiddleware, userAuthMiddleware } = require('./middleware/middleware')
 const { connectDB } = require('./config/database')
-const { User } = require('./models/user')
 const app = express()
 require('dotenv').config()
-const {validateSignupField} = require('./utils/utils')
-const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser')
-const jwt = require('jsonwebtoken')
 const authRouter = require('./router/auth')
 const profileRouter = require('./router/profile')
 const requestRouter = require('./router/request')
 const userRouter = require('./router/user')
+const cors = require('cors')
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
 
 
 app.use('/', authRouter)

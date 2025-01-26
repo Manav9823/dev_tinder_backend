@@ -4,26 +4,27 @@ const { User } = require('../models/user')
 const authRouter = express.Router()
 const bcrypt = require('bcrypt')
 
-authRouter.get('/login', async(req, res) => {
+authRouter.post('/login', async(req, res) => {
     try{
         const {emailId, password} = req.body
+        console.log(emailId)
+        console.log(password)
         // const token = 'ahkvnavjanvlavnlasdvnla'
         const user = await User.findOne({emailId: emailId})
-        console.log(user)
+        // console.log(user)
         if(!user){
-            res.send('User Not found by the email Id')
+            throw new Error('User not found by email Id')
         }
         const valid = await bcrypt.compare(password, user.password)
         if(valid) {
-
             const token = await user.getJWT()
             res.cookie('token', token)
-            res.send('User Logged in successfully')
+            return res.status(200).json({message: 'User Logged in successfully', data: user})
         } else {
-            throw new Error('Password is not correct')
+            throw new Error('Password Incorrect')
         }
     } catch(err) {
-        res.status(404).send('ERR while logging in : ' + err.message)
+        res.status(400).json({ message: 'An error occurred while logging in' + err.message });
     }
 });
 
@@ -44,7 +45,7 @@ authRouter.post('/signup', async(req, res) => {
             password: hashPassword
         })
         await newUser.save()
-        res.status(200).send('User Created Successfully')
+        res.status(200).json({message: 'User Created Successfully'})
     } catch (err) {
         res.status(400).send('Error while making a request : ' + err.message)
     }

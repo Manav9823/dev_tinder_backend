@@ -13,7 +13,7 @@ const requestSchema = new Schema({
     },
     status: {
         type: String,
-        requuire: true,
+        required: true,
         enum:{
             values: ["ignored", "accepted", "rejected", "interested"],
             message: 'Status should be either Pending, Accepted or Rejected'
