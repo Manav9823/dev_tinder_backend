@@ -7,7 +7,7 @@ const profileRouter = express.Router()
 profileRouter.get('/profile', userAuthMiddleware, (req, res) =>{
     try {
         const user = req.user
-        res.status(200).send('User Profile : ' + user)
+        res.status(200).json({message: 'User data ', data:user})
     } catch(err) {
         res.status(400).send('ERR: ' + err.message)
     }
@@ -19,12 +19,13 @@ profileRouter.patch('/updateUser', userAuthMiddleware, async(req, res) => {
         const userDataInDb = req.user
         const updatedUserData = req.body
         console.log(userDataInDb)
+        console.log('updated data is : ',updatedUserData)
         validateUpdateUserBody(req)
         Object.keys(updatedUserData).forEach((key)=>userDataInDb[key] = updatedUserData[key])
         console.log('User Update')
         await userDataInDb.save()
-        res.send('User Updated Successfully' + userDataInDb)
-    } catch (err) {
+        res.status(200).send({message: 'User Updated Successfully', data: userDataInDb})
+    } catch (err) {  
         res.status(400).send('ERR : ' + err.message)
     }
 })

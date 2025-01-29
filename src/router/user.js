@@ -37,7 +37,7 @@ userRouter.get('/feed', userAuthMiddleware, async(req, res, next) => {
             hideUsersFromFeed.add(connection.toUserId.toString())
         })
 
-        const users = await User.find({_id: {$nin: Array.from(hideUsersFromFeed)}}).select('firstName lastName')
+        const users = await User.find({_id: {$nin: Array.from(hideUsersFromFeed)}}).select('firstName lastName about',)
         res.send({data: users})
 
     } catch (err) {

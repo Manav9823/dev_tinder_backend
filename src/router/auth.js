@@ -53,7 +53,9 @@ authRouter.post('/signup', async(req, res) => {
 
 authRouter.get('/logout', (req, res)=>{
     try {
-        res.cookie('token', null).send('User Logged out successfully')
+        res.cookie('token', null, {
+            expires: new Date(Date.now())
+        }).json({message: 'User Logged out successfully'})
     } catch (err) {
 
     }
