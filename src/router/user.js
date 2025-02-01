@@ -2,6 +2,7 @@ const express = require('express')
 const { userAuthMiddleware } = require('../middleware/middleware')
 const { RequestUser } = require('../models/request')
 const { User } = require('../models/user')
+const { connection } = require('mongoose')
 const userRouter = express.Router()
 
 userRouter.get('/getAllPendingRequest', userAuthMiddleware, async (req, res) => {
@@ -18,8 +19,16 @@ userRouter.get('/getAllPendingRequest', userAuthMiddleware, async (req, res) => 
 userRouter.get('/getAllConnections', userAuthMiddleware, async(req, res) => {
     try {
         const loggedInUser = req.user
-        const connections = await RequestUser.find({$or:[{fromUserId: loggedInUser._id, status: 'accepted'},{toUserId: loggedInUser._id, status: 'accepted'}]})
-        res.status(200).send('All the connections : ' + connections)
+        const connections = await RequestUser.find({
+                                $or:[
+                                    {fromUserId: loggedInUser._id, status: 'accepted'},
+                                    {toUserId: loggedInUser._id, status: 'accepted'}
+                                ],  
+                            })
+                            .populate('fromUserId', "firstName lastName")
+                            .populate('toUserId', "firstName lastName")
+        console.log('connections here are', connections)
+        res.status(200).json({message: 'Request successfull', data: connections})
     } catch (err) {
         res.status(400).send('ERR : ' + err.message)
     }

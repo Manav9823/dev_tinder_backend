@@ -5,6 +5,7 @@ const authRouter = express.Router()
 const bcrypt = require('bcrypt')
 
 authRouter.post('/login', async(req, res) => {
+    console.log('Inside login')
     try{
         const {emailId, password} = req.body
         console.log(emailId)
