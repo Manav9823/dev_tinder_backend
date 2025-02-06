@@ -10,6 +10,7 @@ const userRouter = require('./router/user')
 const { createServer } = require('node:http');
 const cors = require('cors')
 const initializeSocket = require('./utils/socket')
+const chatRouter = require('./router/chat')
 const server = createServer(app)
 
 
@@ -26,6 +27,7 @@ app.use('/', profileRouter)
 app.use('/', requestRouter)
 app.use('/', userRouter)
 initializeSocket(server)
+app.use('/', chatRouter)
 
 /**
  * 
